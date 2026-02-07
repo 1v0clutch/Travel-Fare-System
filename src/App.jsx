@@ -5,6 +5,7 @@ function App() {
   const mapContainer = useRef(null)
   const map = useRef(null)
   const routingControl = useRef(null)
+  const completeWaypointSelectionRef = useRef(null) // Add ref for the function
   const [waypoints, setWaypoints] = useState([])
   const [isSettingRoute, setIsSettingRoute] = useState(false)
   const [routeInfo, setRouteInfo] = useState(null)
@@ -22,6 +23,133 @@ function App() {
   const [isCalculatingRoute, setIsCalculatingRoute] = useState(false) // Track route calculation
   const [airportMarkers, setAirportMarkers] = useState([]) // Store airport markers
   const [pierMarkers, setPierMarkers] = useState([]) // Store pier markers
+  const [hoveredRouteId, setHoveredRouteId] = useState(null) // Track hovered route card
+  const [selectedRouteId, setSelectedRouteId] = useState(null) // Track selected route card for zoom
+
+  // Function to process and create routes
+  const processRoute = (updatedSegment) => {
+    console.log('=== processRoute called ===')
+    console.log('Updated segment:', updatedSegment)
+    
+    if (!map.current || !window.L || !updatedSegment) {
+      console.error('Missing requirements:', { map: !!map.current, leaflet: !!window.L, segment: !!updatedSegment })
+      return
+    }
+    
+    console.log('Processing route for vehicle:', updatedSegment.vehicle)
+    setIsCalculatingRoute(true)
+    
+    const waypoints = updatedSegment.waypoints
+    console.log('Waypoints:', waypoints)
+    
+    const isDirectRoute = updatedSegment.vehicle === 'plane' || updatedSegment.vehicle === 'boat' || updatedSegment.vehicle === 'train'
+    console.log('Is direct route:', isDirectRoute)
+    
+    if (isDirectRoute) {
+      console.log('Creating direct route (dashed line)')
+      
+      // For planes, boats, and trains, draw a direct dashed line
+      const latlngs = [waypoints[0], waypoints[1]]
+      console.log('Line coordinates:', latlngs)
+      
+      // Calculate straight-line distance
+      const distanceMeters = map.current.distance(waypoints[0], waypoints[1])
+      const distanceKm = (distanceMeters / 1000).toFixed(2)
+      console.log('Distance:', distanceKm, 'km')
+      
+      // Estimate time based on vehicle type
+      let timeMinutes
+      if (updatedSegment.vehicle === 'plane') {
+        timeMinutes = Math.round((parseFloat(distanceKm) / 800) * 60)
+      } else if (updatedSegment.vehicle === 'train') {
+        timeMinutes = Math.round((parseFloat(distanceKm) / 60) * 60) // Average train speed: 60 km/h
+      } else {
+        timeMinutes = Math.round((parseFloat(distanceKm) / 40) * 60)
+      }
+      console.log('Estimated time:', timeMinutes, 'minutes')
+      
+      const fare = calculateFareByVehicle(parseFloat(distanceKm), updatedSegment.vehicle)
+      console.log('Calculated fare:', fare)
+      
+      // Draw dashed line for plane/boat/train
+      const lineColor = updatedSegment.vehicle === 'plane' ? '#FF6B6B' : // Red for planes
+                       updatedSegment.vehicle === 'train' ? '#9B59B6' : // Violet for trains
+                       '#4CAF50' // Green for boats
+      console.log('Line color:', lineColor)
+      
+      const polyline = window.L.polyline(latlngs, {
+        color: lineColor,
+        weight: 4,
+        opacity: 0.8,
+        dashArray: '10, 10'
+      }).addTo(map.current)
+      
+      console.log('✅ Dashed line added to map!')
+      
+      // Create a pseudo routing control object
+      const pseudoControl = {
+        _line: polyline,
+        remove: function() {
+          if (map.current && this._line) {
+            map.current.removeLayer(this._line)
+          }
+        }
+      }
+      
+      // Create route card
+      const routeCard = {
+        id: updatedSegment.id,
+        vehicle: updatedSegment.vehicle,
+        distance: distanceKm,
+        time: timeMinutes,
+        fare: fare,
+        timestamp: Date.now(),
+        type: 'single',
+        visible: true
+      }
+      
+      console.log('Route card:', routeCard)
+      
+      // Store everything
+      setRouteControls(prev => {
+        console.log('Adding to route controls')
+        return [...prev, {
+          id: updatedSegment.id,
+          control: pseudoControl
+        }]
+      })
+      
+      if (updatedSegment.markers) {
+        setRouteMarkers(prev => {
+          console.log('Adding to route markers')
+          return [...prev, {
+            id: updatedSegment.id,
+            markers: updatedSegment.markers
+          }]
+        })
+      }
+      
+      setRouteCards(prev => {
+        console.log('Adding to route cards')
+        return [...prev, routeCard]
+      })
+      
+      setRouteInfo({
+        distance: distanceKm,
+        time: timeMinutes,
+        fare: fare,
+        vehicle: updatedSegment.vehicle,
+        alternatives: []
+      })
+      
+      setIsVehicleActive(false)
+      setCurrentSegment(null)
+      setIsCalculatingRoute(false)
+      clearSpecialMarkers()
+      
+      console.log('✅ Direct route created successfully!')
+    }
+  }
 
   // Calculate jeepney fare - 13 pesos for first 3km, then 1 peso per km
   const calculateJeepneyFare = (distanceKm) => {
@@ -68,6 +196,17 @@ function App() {
     }
   }
 
+  // Calculate train fare based on Philippine LRT/MRT rates
+  const calculateTrainFare = (distanceKm) => {
+    // LRT/MRT fare: ₱15 for first 5km, then ₱5 per additional km
+    if (distanceKm <= 5) {
+      return 15
+    } else {
+      const additionalKm = distanceKm - 5
+      return 15 + (additionalKm * 5)
+    }
+  }
+
   // Calculate boat fare based on Philippine rates
   const calculateBoatFare = (distanceKm) => {
     if (distanceKm <= 10) {
@@ -109,6 +248,9 @@ function App() {
       case 'motorcycle':
         fare = calculateMotorcycleFare(distanceKm)
         break
+      case 'train':
+        fare = calculateTrainFare(distanceKm)
+        break
       case 'boat':
         fare = calculateBoatFare(distanceKm)
         break
@@ -136,6 +278,8 @@ function App() {
         return distanceKm <= 300 // Bus restricted to 300km
       case 'motorcycle':
         return distanceKm <= 100 // Motorcycle restricted to 100km
+      case 'train':
+        return distanceKm <= 50 // Train restricted to Metro Manila area (50km)
       case 'boat':
         return true // Boat has no distance restrictions
       case 'plane':
@@ -153,6 +297,7 @@ function App() {
       taxi: { icon: '🚕', name: 'Taxi' },
       bus: { icon: '🚍', name: 'Bus' },
       motorcycle: { icon: '🏍️', name: 'Motorcycle' },
+      train: { icon: '🚆', name: 'Train' },
       boat: { icon: '🚤', name: 'Boat' },
       plane: { icon: '✈️', name: 'Plane' }
     }
@@ -287,6 +432,69 @@ function App() {
     ))
   }
 
+  const handleRouteCardClick = (cardId) => {
+    if (!map.current) return
+    
+    setSelectedRouteId(cardId)
+    
+    // Find the route control and markers for this card
+    const routeControl = routeControls.find(control => control.id === cardId)
+    const markers = routeMarkers.find(m => m.id === cardId)
+    
+    if (routeControl && markers && markers.markers.length >= 2) {
+      try {
+        // Get the bounds from the markers
+        const bounds = window.L.latLngBounds(
+          markers.markers.map(marker => marker.getLatLng())
+        )
+        
+        // Zoom to fit the route with padding
+        map.current.fitBounds(bounds, {
+          padding: [50, 50],
+          maxZoom: 15,
+          animate: true,
+          duration: 0.5
+        })
+        
+        // Highlight the route temporarily
+        if (routeControl.control && routeControl.control._line && typeof routeControl.control._line.setStyle === 'function') {
+          const originalStyle = {
+            weight: routeControl.control._line.options.weight || 4,
+            opacity: routeControl.control._line.options.opacity || 0.8
+          }
+          
+          // Highlight
+          routeControl.control._line.setStyle({
+            weight: 8,
+            opacity: 1
+          })
+          
+          // Reset after animation
+          setTimeout(() => {
+            try {
+              if (routeControl.control && routeControl.control._line && typeof routeControl.control._line.setStyle === 'function') {
+                routeControl.control._line.setStyle(originalStyle)
+              }
+            } catch (e) {
+              console.log('Error resetting route style after zoom:', e)
+            }
+            setSelectedRouteId(null)
+          }, 1500)
+        } else {
+          // For road routes, just clear selection after animation
+          setTimeout(() => {
+            setSelectedRouteId(null)
+          }, 1500)
+        }
+      } catch (e) {
+        console.log('Error zooming to route:', e)
+        setSelectedRouteId(null)
+      }
+    } else {
+      setSelectedRouteId(null)
+    }
+  }
+
   // Major airports in the Philippines
   const airports = [
     // Luzon
@@ -380,6 +588,61 @@ function App() {
     { name: "Bohol Port (Tubigon)", lat: 10.0500, lng: 123.9833 }
   ]
 
+  // Major train stations in Metro Manila (LRT, MRT, PNR)
+  const trainStations = [
+    // LRT-1 Line
+    { name: "Roosevelt", lat: 14.6544, lng: 121.0237, line: "LRT-1" },
+    { name: "Balintawak", lat: 14.6536, lng: 121.0197, line: "LRT-1" },
+    { name: "Monumento", lat: 14.6542, lng: 120.9842, line: "LRT-1" },
+    { name: "5th Avenue", lat: 14.6508, lng: 120.9836, line: "LRT-1" },
+    { name: "R. Papa", lat: 14.6197, lng: 120.9836, line: "LRT-1" },
+    { name: "Abad Santos", lat: 14.6133, lng: 120.9836, line: "LRT-1" },
+    { name: "Blumentritt", lat: 14.6108, lng: 120.9836, line: "LRT-1" },
+    { name: "Tayuman", lat: 14.6044, lng: 120.9836, line: "LRT-1" },
+    { name: "Bambang", lat: 14.6011, lng: 120.9836, line: "LRT-1" },
+    { name: "Doroteo Jose", lat: 14.5997, lng: 120.9836, line: "LRT-1" },
+    { name: "Carriedo", lat: 14.5958, lng: 120.9836, line: "LRT-1" },
+    { name: "Central Terminal", lat: 14.5908, lng: 120.9836, line: "LRT-1" },
+    { name: "United Nations", lat: 14.5808, lng: 120.9836, line: "LRT-1" },
+    { name: "Pedro Gil", lat: 14.5758, lng: 120.9836, line: "LRT-1" },
+    { name: "Quirino", lat: 14.5708, lng: 120.9836, line: "LRT-1" },
+    { name: "Vito Cruz", lat: 14.5658, lng: 120.9836, line: "LRT-1" },
+    { name: "Gil Puyat", lat: 14.5608, lng: 120.9836, line: "LRT-1" },
+    { name: "Libertad", lat: 14.5558, lng: 120.9836, line: "LRT-1" },
+    { name: "EDSA", lat: 14.5508, lng: 120.9836, line: "LRT-1" },
+    { name: "Baclaran", lat: 14.5458, lng: 120.9836, line: "LRT-1" },
+    
+    // MRT-3 Line
+    { name: "North Avenue", lat: 14.6564, lng: 121.0319, line: "MRT-3" },
+    { name: "Quezon Avenue", lat: 14.6308, lng: 121.0319, line: "MRT-3" },
+    { name: "GMA Kamuning", lat: 14.6258, lng: 121.0319, line: "MRT-3" },
+    { name: "Araneta Center-Cubao", lat: 14.6208, lng: 121.0519, line: "MRT-3" },
+    { name: "Santolan-Annapolis", lat: 14.6158, lng: 121.0719, line: "MRT-3" },
+    { name: "Ortigas", lat: 14.5858, lng: 121.0569, line: "MRT-3" },
+    { name: "Shaw Boulevard", lat: 14.5808, lng: 121.0519, line: "MRT-3" },
+    { name: "Boni", lat: 14.5758, lng: 121.0469, line: "MRT-3" },
+    { name: "Guadalupe", lat: 14.5558, lng: 121.0419, line: "MRT-3" },
+    { name: "Buendia", lat: 14.5508, lng: 121.0319, line: "MRT-3" },
+    { name: "Ayala", lat: 14.5458, lng: 121.0269, line: "MRT-3" },
+    { name: "Magallanes", lat: 14.5408, lng: 121.0219, line: "MRT-3" },
+    { name: "Taft Avenue", lat: 14.5358, lng: 121.0169, line: "MRT-3" },
+    
+    // LRT-2 Line
+    { name: "Recto", lat: 14.6028, lng: 120.9911, line: "LRT-2" },
+    { name: "Legarda", lat: 14.6028, lng: 121.0011, line: "LRT-2" },
+    { name: "Pureza", lat: 14.6028, lng: 121.0111, line: "LRT-2" },
+    { name: "V. Mapa", lat: 14.6028, lng: 121.0211, line: "LRT-2" },
+    { name: "J. Ruiz", lat: 14.6028, lng: 121.0311, line: "LRT-2" },
+    { name: "Gilmore", lat: 14.6128, lng: 121.0411, line: "LRT-2" },
+    { name: "Betty Go-Belmonte", lat: 14.6228, lng: 121.0511, line: "LRT-2" },
+    { name: "Araneta Center-Cubao", lat: 14.6228, lng: 121.0519, line: "LRT-2" },
+    { name: "Anonas", lat: 14.6278, lng: 121.0619, line: "LRT-2" },
+    { name: "Katipunan", lat: 14.6328, lng: 121.0719, line: "LRT-2" },
+    { name: "Santolan", lat: 14.6378, lng: 121.0819, line: "LRT-2" },
+    { name: "Marikina-Pasig", lat: 14.6428, lng: 121.0919, line: "LRT-2" },
+    { name: "Antipolo", lat: 14.6478, lng: 121.1019, line: "LRT-2" }
+  ]
+
   const showVehicleSpecificMarkers = (vehicle) => {
     if (!map.current || !window.L) return
 
@@ -400,6 +663,9 @@ function App() {
         .addTo(map.current)
         .bindPopup(`<strong>${airport.name}</strong><br><small>Click to select this airport</small>`)
         
+        // Store airport data on the marker for later use
+        marker.airportData = airport
+        
         return marker
       })
       setAirportMarkers(newAirportMarkers)
@@ -419,10 +685,34 @@ function App() {
         .addTo(map.current)
         .bindPopup(`<strong>${pier.name}</strong><br><small>Click to select this port</small>`)
         
+        // Store pier data on the marker for later use
+        marker.pierData = pier
+        
         return marker
       })
       setPierMarkers(newPierMarkers)
       console.log(`Added ${newPierMarkers.length} pier markers`)
+    } else if (vehicle === 'train') {
+      // Show train stations
+      const newTrainMarkers = trainStations.map(station => {
+        const marker = window.L.marker([station.lat, station.lng], {
+          icon: window.L.divIcon({
+            html: '<div style="background: rgba(255, 179, 71, 0.95); border: 3px solid #FFB347; border-radius: 50%; width: 36px; height: 36px; display: flex; align-items: center; justify-content: center; font-size: 18px; box-shadow: 0 4px 12px rgba(255, 179, 71, 0.6); cursor: pointer; transition: all 0.3s ease;" onmouseover="this.style.transform=\'scale(1.2)\'; this.style.boxShadow=\'0 6px 16px rgba(255, 179, 71, 0.8)\';" onmouseout="this.style.transform=\'scale(1)\'; this.style.boxShadow=\'0 4px 12px rgba(255, 179, 71, 0.6)\';">🚆</div>',
+            className: 'train-marker-container',
+            iconSize: [36, 36],
+            iconAnchor: [18, 18]
+          })
+        })
+        .addTo(map.current)
+        .bindPopup(`<strong>${station.name}</strong><br><small>${station.line}</small><br><small>Click to select this station</small>`)
+        
+        // Store station data on the marker for later use
+        marker.stationData = station
+        
+        return marker
+      })
+      setAirportMarkers(newTrainMarkers) // Reuse airportMarkers state for train markers
+      console.log(`Added ${newTrainMarkers.length} train station markers`)
     }
   }
 
@@ -430,23 +720,31 @@ function App() {
     if (!map.current) return
     
     // Clear airport markers
-    airportMarkers.forEach(marker => {
-      try {
-        map.current.removeLayer(marker)
-      } catch (e) {
-        console.log('Error removing airport marker:', e)
-      }
-    })
+    if (airportMarkers && airportMarkers.length > 0) {
+      airportMarkers.forEach(marker => {
+        try {
+          if (marker && map.current.hasLayer(marker)) {
+            map.current.removeLayer(marker)
+          }
+        } catch (e) {
+          console.log('Error removing airport marker:', e)
+        }
+      })
+    }
     setAirportMarkers([])
 
     // Clear pier markers
-    pierMarkers.forEach(marker => {
-      try {
-        map.current.removeLayer(marker)
-      } catch (e) {
-        console.log('Error removing pier marker:', e)
-      }
-    })
+    if (pierMarkers && pierMarkers.length > 0) {
+      pierMarkers.forEach(marker => {
+        try {
+          if (marker && map.current.hasLayer(marker)) {
+            map.current.removeLayer(marker)
+          }
+        } catch (e) {
+          console.log('Error removing pier marker:', e)
+        }
+      })
+    }
     setPierMarkers([])
     
     console.log('Cleared all special markers')
@@ -537,11 +835,11 @@ function App() {
         // Complete the route for this vehicle
         const waypoints = updatedSegment.waypoints
         
-        // Check if this is a plane or boat route (direct line instead of road routing)
-        const isDirectRoute = currentSegment.vehicle === 'plane' || currentSegment.vehicle === 'boat'
+        // Check if this is a plane, boat, or train route (direct line instead of road routing)
+        const isDirectRoute = currentSegment.vehicle === 'plane' || currentSegment.vehicle === 'boat' || currentSegment.vehicle === 'train'
         
         if (isDirectRoute) {
-          // For planes and boats, draw a direct dashed line
+          // For planes, boats, and trains, draw a direct dashed line
           const latlngs = [waypoints[0], waypoints[1]]
           
           // Calculate straight-line distance
@@ -553,6 +851,9 @@ function App() {
           if (currentSegment.vehicle === 'plane') {
             // Average plane speed: 800 km/h
             timeMinutes = Math.round((parseFloat(distanceKm) / 800) * 60)
+          } else if (currentSegment.vehicle === 'train') {
+            // Average train speed: 60 km/h
+            timeMinutes = Math.round((parseFloat(distanceKm) / 60) * 60)
           } else {
             // Average boat speed: 40 km/h
             timeMinutes = Math.round((parseFloat(distanceKm) / 40) * 60)
@@ -563,11 +864,13 @@ function App() {
           const fare = calculateFareByVehicle(parseFloat(distanceKm), currentSegment.vehicle)
           console.log('Calculated fare:', fare)
           
-          // Draw dashed line for plane/boat
-          const lineColor = currentSegment.vehicle === 'plane' ? '#A8E6CF' : '#4ECDC4'
+          // Draw dashed line for plane/boat/train
+          const lineColor = currentSegment.vehicle === 'plane' ? '#FF6B6B' : // Red for planes
+                           currentSegment.vehicle === 'train' ? '#9B59B6' : // Violet for trains
+                           '#4CAF50' // Green for boats
           const polyline = window.L.polyline(latlngs, {
             color: lineColor,
-            weight: 3,
+            weight: 4,
             opacity: 0.8,
             dashArray: '10, 10' // Dashed line
           }).addTo(map.current)
@@ -783,57 +1086,27 @@ function App() {
         } // Close else block for land vehicles
       }
     }
+    
+    // Store the function in ref so it can be accessed by marker click handlers
+    completeWaypointSelectionRef.current = completeWaypointSelection
 
     const handleMapClick = (e) => {
       console.log('Map clicked:', { isVehicleActive, currentSegment })
       if (isVehicleActive && currentSegment && currentSegment.waypoints.length < 2) {
+        // Only allow map clicks for land vehicles (not plane, boat, train)
+        if (currentSegment.vehicle === 'plane' || currentSegment.vehicle === 'boat' || currentSegment.vehicle === 'train') {
+          // For these vehicles, user must click on markers
+          return
+        }
+        
         const newWaypoint = e.latlng
         const waypointIndex = currentSegment.waypoints.length
-        const isFirstPoint = waypointIndex === 0
-        const isSecondPoint = waypointIndex === 1
-        let locationName = '' // Initialize locationName for all vehicles
+        const locationName = '' // No location names for land vehicles
         
-        // Handle special routing for planes and boats - MUST click on markers directly
-        if (currentSegment.vehicle === 'plane') {
-          // Find nearest airport marker - must be very close
-          const nearestAirport = airports.find(airport => {
-            const distance = map.current.distance([airport.lat, airport.lng], newWaypoint)
-            return distance < 2000 // Within 2km of airport marker - must click on or very near marker
-          })
-          
-          if (!nearestAirport) {
-            alert('✈️ Please click directly on an airport marker (green circles with ✈️)')
-            return
-          } else {
-            locationName = nearestAirport.name
-            // Snap to exact airport location
-            newWaypoint.lat = nearestAirport.lat
-            newWaypoint.lng = nearestAirport.lng
-          }
-        } else if (currentSegment.vehicle === 'boat') {
-          // Find nearest pier marker - must be very close
-          const nearestPier = piers.find(pier => {
-            const distance = map.current.distance([pier.lat, pier.lng], newWaypoint)
-            return distance < 2000 // Within 2km of pier marker - must click on or very near marker
-          })
-          
-          if (!nearestPier) {
-            alert('🚤 Please click directly on a port/pier marker (teal circles with ⚓)')
-            return
-          } else {
-            locationName = nearestPier.name
-            // Snap to exact pier location
-            newWaypoint.lat = nearestPier.lat
-            newWaypoint.lng = nearestPier.lng
-          }
-        }
-        // For other vehicles (jeepney, tricycle, taxi, motorcycle), locationName stays empty
-        
-        // Complete waypoint selection for all vehicles
+        // Complete waypoint selection for land vehicles
         console.log('Completing waypoint selection:', {
           vehicle: currentSegment.vehicle,
           waypoint: newWaypoint,
-          locationName: locationName,
           waypointIndex: waypointIndex
         })
         completeWaypointSelection(newWaypoint, locationName, waypointIndex)
@@ -857,6 +1130,160 @@ function App() {
       clearSpecialMarkers()
     }
   }, [selectedVehicle, isVehicleActive])
+
+  // Separate useEffect to attach click handlers to markers
+  useEffect(() => {
+    const handleMarkerClick = (e, markerData, locationType) => {
+      try {
+        window.L.DomEvent.stopPropagation(e)
+      } catch (err) {
+        console.log('Error stopping propagation:', err)
+      }
+      
+      console.log(`${locationType} marker clicked:`, markerData.name)
+      
+      if (isVehicleActive && currentSegment && currentSegment.waypoints.length < 2) {
+        const waypointIndex = currentSegment.waypoints.length
+        const newWaypoint = { lat: markerData.lat, lng: markerData.lng }
+        const locationName = locationType === 'station' ? 
+          `${markerData.name} (${markerData.line})` : 
+          markerData.name
+        
+        // Call the ref function
+        if (completeWaypointSelectionRef.current) {
+          try {
+            completeWaypointSelectionRef.current(newWaypoint, locationName, waypointIndex)
+          } catch (err) {
+            console.log('Error completing waypoint selection:', err)
+          }
+        }
+      }
+    }
+    
+    // Attach click handlers to airport markers
+    if (airportMarkers && airportMarkers.length > 0) {
+      airportMarkers.forEach(marker => {
+        if (marker && marker.airportData) {
+          try {
+            marker.on('click', (e) => handleMarkerClick(e, marker.airportData, 'airport'))
+          } catch (err) {
+            console.log('Error attaching airport marker click:', err)
+          }
+        }
+      })
+    }
+    
+    // Attach click handlers to pier markers
+    if (pierMarkers && pierMarkers.length > 0) {
+      pierMarkers.forEach(marker => {
+        if (marker && marker.pierData) {
+          try {
+            marker.on('click', (e) => handleMarkerClick(e, marker.pierData, 'pier'))
+          } catch (err) {
+            console.log('Error attaching pier marker click:', err)
+          }
+        }
+      })
+    }
+    
+    // Attach click handlers to train markers (stored in airportMarkers for trains)
+    if (selectedVehicle === 'train' && airportMarkers && airportMarkers.length > 0) {
+      airportMarkers.forEach(marker => {
+        if (marker && marker.stationData) {
+          try {
+            marker.on('click', (e) => handleMarkerClick(e, marker.stationData, 'station'))
+          } catch (err) {
+            console.log('Error attaching train marker click:', err)
+          }
+        }
+      })
+    }
+    
+    // Cleanup
+    return () => {
+      if (airportMarkers && airportMarkers.length > 0) {
+        airportMarkers.forEach(marker => {
+          try {
+            if (marker) marker.off('click')
+          } catch (err) {
+            console.log('Error removing airport marker click:', err)
+          }
+        })
+      }
+      if (pierMarkers && pierMarkers.length > 0) {
+        pierMarkers.forEach(marker => {
+          try {
+            if (marker) marker.off('click')
+          } catch (err) {
+            console.log('Error removing pier marker click:', err)
+          }
+        })
+      }
+    }
+  }, [airportMarkers, pierMarkers, isVehicleActive, currentSegment, selectedVehicle])
+
+  // Highlight route on hover
+  useEffect(() => {
+    if (!map.current || !hoveredRouteId) return
+
+    const routeControl = routeControls.find(control => control.id === hoveredRouteId)
+    if (!routeControl || !routeControl.control) return
+
+    let originalStyle = null
+    let highlightApplied = false
+
+    try {
+      // Highlight the route line
+      if (routeControl.control._line && typeof routeControl.control._line.setStyle === 'function') {
+        // For direct routes (plane/boat/train) - they have _line property
+        originalStyle = {
+          weight: routeControl.control._line.options.weight || 4,
+          opacity: routeControl.control._line.options.opacity || 0.8
+        }
+        
+        routeControl.control._line.setStyle({
+          weight: 6,
+          opacity: 1
+        })
+        highlightApplied = true
+      } else if (routeControl.control._routes && routeControl.control._routes.length > 0) {
+        // For road routes - they have _routes property
+        const route = routeControl.control._routes[0]
+        if (route && route.line && typeof route.line.setStyle === 'function') {
+          originalStyle = {
+            weight: route.line.options.weight || 4,
+            opacity: route.line.options.opacity || 0.8
+          }
+          
+          route.line.setStyle({
+            weight: 8,
+            opacity: 1
+          })
+          highlightApplied = true
+        }
+      }
+    } catch (e) {
+      console.log('Error highlighting route:', e)
+    }
+
+    // Cleanup - reset style when unhovered
+    return () => {
+      if (!highlightApplied || !routeControl || !routeControl.control) return
+
+      try {
+        if (routeControl.control._line && typeof routeControl.control._line.setStyle === 'function' && originalStyle) {
+          routeControl.control._line.setStyle(originalStyle)
+        } else if (routeControl.control._routes && routeControl.control._routes.length > 0 && originalStyle) {
+          const route = routeControl.control._routes[0]
+          if (route && route.line && typeof route.line.setStyle === 'function') {
+            route.line.setStyle(originalStyle)
+          }
+        }
+      } catch (e) {
+        console.log('Error resetting route style:', e)
+      }
+    }
+  }, [hoveredRouteId, routeControls])
 
   const startRouting = () => {
     // Clear existing waypoints and markers
@@ -958,39 +1385,80 @@ function App() {
           {/* Vehicle Selection */}
           <div className="vehicle-selection-card">
             <div className="card-content">
-              <div className="vehicle-grid">
-                {['jeepney', 'tricycle', 'taxi', 'bus', 'motorcycle', 'boat', 'plane'].map((vehicle) => {
-                  const vehicleInfo = getVehicleInfo(vehicle)
-                  const isSelected = selectedVehicle === vehicle && isVehicleActive
-                  return (
-                    <div key={vehicle} className="vehicle-container">
-                      <button 
-                        className={`vehicle-option ${isSelected ? 'active' : ''}`}
-                        onClick={() => handleVehicleSelect(vehicle)}
-                      >
-                        <span className="vehicle-icon">{vehicleInfo.icon}</span>
-                      </button>
-                      {isSelected && currentSegment && (
-                        <div className="route-status">
-                          {isCalculatingRoute ? "Calculating route..." : (
-                            <>
-                              {currentSegment.waypoints.length === 0 && 
-                                (vehicle === 'plane' ? "Click airport marker" : 
-                                 vehicle === 'boat' ? "Click port marker" : "Click Point A")}
-                              {currentSegment.waypoints.length === 1 && 
-                                (vehicle === 'plane' ? "Click airport marker" : 
-                                 vehicle === 'boat' ? "Click port marker" : "Click Point B")}
-                            </>
-                          )}
-                        </div>
-                      )}
-                    </div>
-                  )
-                })}
+              <div className="vehicle-dropdown-container">
+                <label htmlFor="vehicle-select" className="dropdown-label">
+                  Select Transportation Mode
+                </label>
+                <select 
+                  id="vehicle-select"
+                  className="vehicle-dropdown"
+                  value={selectedVehicle || ''}
+                  onChange={(e) => {
+                    if (e.target.value) {
+                      handleVehicleSelect(e.target.value)
+                    }
+                  }}
+                  disabled={isVehicleActive}
+                >
+                  <option value="">-- Choose a vehicle --</option>
+                  
+                  <optgroup label="📏 Kilometer Based">
+                    <option value="jeepney">🚌 Jeepney</option>
+                    <option value="tricycle">🛺 Tricycle</option>
+                    <option value="bus">🚍 Bus</option>
+                  </optgroup>
+                  
+                  <optgroup label="📍 Meter Based">
+                    <option value="motorcycle">🏍️ Motorcycle</option>
+                    <option value="taxi">🚕 Taxi</option>
+                  </optgroup>
+                  
+                  <optgroup label="✨ Special Case">
+                    <option value="plane">✈️ Airplane</option>
+                    <option value="boat">🚤 Boat</option>
+                    <option value="train">🚆 Train</option>
+                  </optgroup>
+                </select>
+                
+                {isVehicleActive && selectedVehicle && currentSegment && (
+                  <div className="route-status-box">
+                    {isCalculatingRoute ? (
+                      <span className="status-text calculating">⏳ Calculating route...</span>
+                    ) : (
+                      <>
+                        {currentSegment.waypoints.length === 0 && (
+                          <span className="status-text">
+                            {selectedVehicle === 'plane' ? "📍 Click on an airport marker" : 
+                             selectedVehicle === 'boat' ? "📍 Click on a port marker" :
+                             selectedVehicle === 'train' ? "📍 Click on a station marker" : 
+                             "📍 Click Point A on the map"}
+                          </span>
+                        )}
+                        {currentSegment.waypoints.length === 1 && (
+                          <span className="status-text">
+                            {selectedVehicle === 'plane' ? "📍 Click on another airport marker" : 
+                             selectedVehicle === 'boat' ? "📍 Click on another port marker" :
+                             selectedVehicle === 'train' ? "📍 Click on another station marker" : 
+                             "📍 Click Point B on the map"}
+                          </span>
+                        )}
+                      </>
+                    )}
+                  </div>
+                )}
+                
+                {selectedVehicle && isVehicleActive && (
+                  <div className="selected-vehicle-info">
+                    <span className="vehicle-badge">
+                      {getVehicleInfo(selectedVehicle).icon} {getVehicleInfo(selectedVehicle).name}
+                    </span>
+                  </div>
+                )}
               </div>
+              
               {routeCards.length > 0 && !isVehicleActive && (
                 <div className="route-connection-options">
-                  <p className="connection-text">Next route will be separate or you can connect to existing routes</p>
+                  <p className="connection-text">💡 Select another vehicle to add a new route</p>
                 </div>
               )}
             </div>
@@ -998,7 +1466,6 @@ function App() {
           
 
           
-
           {/* Multi-Modal Vehicle Selection */}
           {waypoints.length === 2 && !multiModalRoute && (
             <div className="multi-modal-selection">
@@ -1230,7 +1697,14 @@ function App() {
               </div>
               <div className="route-cards-list">
                 {routeCards.map((card) => (
-                  <div key={card.id} className={`route-card ${!card.visible ? 'route-hidden' : ''}`}>
+                  <div 
+                    key={card.id} 
+                    className={`route-card ${!card.visible ? 'route-hidden' : ''} ${hoveredRouteId === card.id ? 'route-hovered' : ''} ${selectedRouteId === card.id ? 'route-selected' : ''}`}
+                    onMouseEnter={() => setHoveredRouteId(card.id)}
+                    onMouseLeave={() => setHoveredRouteId(null)}
+                    onClick={() => handleRouteCardClick(card.id)}
+                    style={{ cursor: 'pointer' }}
+                  >
                     <div className="route-card-header">
                       <div className="route-card-title">
                         <span className="vehicle-icon">{getVehicleInfo(card.vehicle).icon}</span>
@@ -1239,14 +1713,20 @@ function App() {
                       <div className="route-card-actions">
                         <button 
                           className="toggle-route-btn"
-                          onClick={() => toggleRouteVisibility(card.id)}
+                          onClick={(e) => {
+                            e.stopPropagation()
+                            toggleRouteVisibility(card.id)
+                          }}
                           title={card.visible ? "Hide route" : "Show route"}
                         >
                           {card.visible ? '👁️' : '👁️‍🗨️'}
                         </button>
                         <button 
                           className="close-route-btn"
-                          onClick={() => removeRouteCard(card.id)}
+                          onClick={(e) => {
+                            e.stopPropagation()
+                            removeRouteCard(card.id)
+                          }}
                           title="Remove this route"
                         >
                           ✕
@@ -1256,7 +1736,7 @@ function App() {
                     <div className="route-card-content">
                       <div className="route-card-stats">
                         <div className="route-stat">
-                          <span className="stat-icon">📏</span>
+                          <span className="stat-icon">�</span>
                           <span className="stat-value">{card.distance} km</span>
                         </div>
                         <div className="route-stat">

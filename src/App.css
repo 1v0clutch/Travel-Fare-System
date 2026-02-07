@@ -821,60 +821,117 @@
   padding: 20px;
 }
 
-.vehicle-grid {
-  display: flex;
-  justify-content: center;
-  align-items: flex-start;
-  gap: 15px;
-  flex-wrap: nowrap; /* Force horizontal line only */
-  margin: 0 auto;
-  max-width: 600px;
-  overflow-x: auto; /* Allow horizontal scroll if needed */
-}
-
-.vehicle-container {
+.vehicle-dropdown-container {
   display: flex;
   flex-direction: column;
-  align-items: center;
-  gap: 8px;
-  margin-bottom: 10px; /* Add margin to prevent overlap with buttons */
+  gap: 12px;
 }
 
-.vehicle-option {
-  background: rgba(255, 255, 255, 0.05);
-  border: 2px solid rgba(255, 255, 255, 0.1);
-  border-radius: 50%;
-  padding: 0;
+.dropdown-label {
+  color: #fff;
+  font-weight: 600;
+  font-size: 16px;
+  margin-bottom: 4px;
+}
+
+.vehicle-dropdown {
+  width: 100%;
+  padding: 12px 16px;
+  background: rgba(255, 255, 255, 0.1);
+  border: 2px solid rgba(255, 255, 255, 0.2);
+  border-radius: 12px;
+  color: #fff;
+  font-size: 16px;
+  font-weight: 500;
   cursor: pointer;
   transition: all 0.3s ease;
+  outline: none;
+}
+
+.vehicle-dropdown:hover:not(:disabled) {
+  background: rgba(255, 255, 255, 0.15);
+  border-color: #4CAF50;
+}
+
+.vehicle-dropdown:focus {
+  border-color: #4CAF50;
+  box-shadow: 0 0 0 3px rgba(76, 175, 80, 0.2);
+}
+
+.vehicle-dropdown:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.vehicle-dropdown option {
+  background: #2a2a2a;
+  color: #fff;
+  padding: 8px;
+  font-size: 15px;
+}
+
+.vehicle-dropdown optgroup {
+  background: #1a1a1a;
+  color: #4CAF50;
+  font-weight: bold;
+  font-size: 14px;
+  padding: 8px 0;
+}
+
+.route-status-box {
+  background: rgba(255, 152, 0, 0.15);
+  border: 2px solid #FF9800;
+  border-radius: 12px;
+  padding: 12px 16px;
+  animation: pulse-glow 2s infinite;
+}
+
+@keyframes pulse-glow {
+  0%, 100% {
+    box-shadow: 0 0 10px rgba(255, 152, 0, 0.3);
+  }
+  50% {
+    box-shadow: 0 0 20px rgba(255, 152, 0, 0.5);
+  }
+}
+
+.status-text {
+  color: #fff;
+  font-size: 14px;
+  font-weight: 500;
   display: flex;
   align-items: center;
+  gap: 8px;
+}
+
+.status-text.calculating {
+  animation: pulse 1.5s infinite;
+}
+
+.selected-vehicle-info {
+  display: flex;
   justify-content: center;
-  width: 60px;
-  height: 60px;
-  flex-shrink: 0;
+  align-items: center;
+  padding: 8px;
 }
 
-.vehicle-option:hover {
-  background: rgba(255, 255, 255, 0.1);
-  transform: translateY(-2px) scale(1.05);
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+.vehicle-badge {
+  background: linear-gradient(135deg, #4CAF50 0%, #45a049 100%);
+  color: #fff;
+  padding: 8px 16px;
+  border-radius: 20px;
+  font-size: 16px;
+  font-weight: 600;
+  box-shadow: 0 4px 12px rgba(76, 175, 80, 0.3);
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
 }
 
-.vehicle-option.active {
-  border-color: #4CAF50;
-  background: rgba(76, 175, 80, 0.2);
-  box-shadow: 0 0 20px rgba(76, 175, 80, 0.4);
-  transform: scale(1.1);
-}
-
+/* Keep these for route cards and other uses */
 .vehicle-icon {
   font-size: 24px;
   transition: all 0.3s ease;
-}
-
-.vehicle-option:hover .vehicle-icon {
-  transform: scale(1.1);
 }
 
 .vehicle-name {
@@ -892,6 +949,9 @@
   border-radius: 16px;
   overflow: hidden;
   box-shadow: 0 4px 16px rgba(0, 0, 0, 0.2);
+  display: flex;
+  flex-direction: column;
+  max-height: 500px; /* Limit total height */
 }
 
 .route-cards-list {
@@ -899,6 +959,61 @@
   flex-direction: column;
   gap: 12px;
   padding: 16px;
+  max-height: 400px;
+  overflow-y: auto;
+  overflow-x: hidden;
+  scroll-behavior: smooth;
+  flex: 1; /* Allow it to grow within container */
+  min-height: 0; /* Important for flex scrolling */
+}
+
+/* Enhanced custom scrollbar for route cards list */
+.route-cards-list::-webkit-scrollbar {
+  width: 10px;
+}
+
+.route-cards-list::-webkit-scrollbar-track {
+  background: rgba(255, 255, 255, 0.05);
+  border-radius: 5px;
+  margin: 4px;
+}
+
+.route-cards-list::-webkit-scrollbar-thumb {
+  background: linear-gradient(135deg, rgba(76, 175, 80, 0.6), rgba(76, 175, 80, 0.8));
+  border-radius: 5px;
+  border: 2px solid rgba(255, 255, 255, 0.05);
+}
+
+.route-cards-list::-webkit-scrollbar-thumb:hover {
+  background: linear-gradient(135deg, rgba(76, 175, 80, 0.8), rgba(76, 175, 80, 1));
+}
+
+/* Firefox scrollbar */
+.route-cards-list {
+  scrollbar-width: thin;
+  scrollbar-color: rgba(76, 175, 80, 0.6) rgba(255, 255, 255, 0.05);
+}
+
+/* Scroll indicator shadows */
+.route-cards-list::before,
+.route-cards-list::after {
+  content: '';
+  position: sticky;
+  left: 0;
+  right: 0;
+  height: 20px;
+  pointer-events: none;
+  z-index: 10;
+}
+
+.route-cards-list::before {
+  top: 0;
+  background: linear-gradient(to bottom, rgba(0, 0, 0, 0.2), transparent);
+}
+
+.route-cards-list::after {
+  bottom: 0;
+  background: linear-gradient(to top, rgba(0, 0, 0, 0.2), transparent);
 }
 
 .route-card {
@@ -908,12 +1023,39 @@
   overflow: hidden;
   transition: all 0.3s ease;
   position: relative;
+  cursor: pointer;
+  user-select: none;
 }
 
 .route-card:hover {
   background: rgba(255, 255, 255, 0.12);
   transform: translateY(-2px);
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+}
+
+.route-card.route-hovered {
+  background: rgba(76, 175, 80, 0.2);
+  border-color: #4CAF50;
+  box-shadow: 0 6px 20px rgba(76, 175, 80, 0.4);
+  transform: translateY(-3px) scale(1.02);
+}
+
+.route-card.route-selected {
+  background: rgba(76, 175, 80, 0.3);
+  border-color: #4CAF50;
+  border-width: 2px;
+  box-shadow: 0 8px 24px rgba(76, 175, 80, 0.6);
+  transform: translateY(-4px) scale(1.03);
+  animation: pulse-border 1.5s ease-in-out;
+}
+
+@keyframes pulse-border {
+  0%, 100% {
+    box-shadow: 0 8px 24px rgba(76, 175, 80, 0.6);
+  }
+  50% {
+    box-shadow: 0 8px 32px rgba(76, 175, 80, 0.8);
+  }
 }
 
 .route-card.removing {
@@ -1143,6 +1285,10 @@
   border: 2px solid #28A745;
 }
 
+.train-leg {
+  border: 2px solid #FFB347;
+}
+
 .motorcycle-leg {
   border: 2px solid #FF6B6B;
 }
@@ -1169,6 +1315,10 @@
 
 .bus-leg .leg-header {
   background: linear-gradient(135deg, #28A745 0%, #1E7E34 100%);
+}
+
+.train-leg .leg-header {
+  background: linear-gradient(135deg, #FFB347 0%, #FF8C00 100%);
 }
 
 .motorcycle-leg .leg-header {
