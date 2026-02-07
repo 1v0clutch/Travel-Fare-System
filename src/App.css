@@ -1,0 +1,1392 @@
+#root {
+  width: 100vw;
+  height: 100vh;
+  margin: 0;
+  padding: 0;
+  text-align: center;
+}
+
+.logo {
+  height: 6em;
+  padding: 1.5em;
+  will-change: filter;
+  transition: filter 300ms;
+}
+.logo:hover {
+  filter: drop-shadow(0 0 2em #646cffaa);
+}
+.logo.react:hover {
+  filter: drop-shadow(0 0 2em #61dafbaa);
+}
+
+@keyframes logo-spin {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  a:nth-of-type(2) .logo {
+    animation: logo-spin infinite 20s linear;
+  }
+}
+
+.card {
+  padding: 2em;
+}
+
+.read-the-docs {
+  color: #888;
+}
+/* Two-section layout - max screen ratio */
+.app-container {
+  display: flex;
+  width: 100vw;
+  height: 100vh;
+  margin: 0;
+  padding: 0;
+}
+
+.section {
+  flex: 1;
+  width: 50%;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+}
+
+.left-section {
+  padding: 20px;
+  justify-content: flex-start;
+  align-items: stretch;
+}
+
+.right-section {
+  padding: 0;
+  justify-content: stretch;
+  align-items: stretch;
+  position: relative;
+}
+
+.map-container {
+  width: 100%;
+  height: 100%;
+}
+/* Route control buttons - moved to bottom right */
+.route-controls {
+  position: absolute;
+  bottom: 20px;
+  right: 20px;
+  z-index: 1000;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.route-btn, .clear-btn {
+  padding: 10px 15px;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+  font-weight: bold;
+  transition: all 0.3s ease;
+}
+
+.route-btn {
+  background: #4CAF50;
+  color: white;
+}
+
+.route-btn.active {
+  background: #FF9800;
+  animation: pulse 1.5s infinite;
+}
+
+.route-btn:disabled {
+  cursor: not-allowed;
+}
+
+.clear-btn {
+  background: #f44336;
+  color: white;
+}
+
+.route-btn:hover:not(:disabled), .clear-btn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+}
+
+@keyframes pulse {
+  0% { opacity: 1; }
+  50% { opacity: 0.7; }
+  100% { opacity: 1; }
+}
+/* Enhanced Leaflet Routing Machine UI improvements */
+.leaflet-routing-container {
+  background: rgba(255, 255, 255, 0.95) !important;
+  border: 2px solid #4CAF50 !important;
+  border-radius: 12px !important;
+  box-shadow: 0 8px 24px rgba(76, 175, 80, 0.3) !important;
+  max-height: 350px !important;
+  overflow-y: auto !important;
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif !important;
+  backdrop-filter: blur(10px) !important;
+}
+
+.leaflet-routing-container h2 {
+  color: #fff !important;
+  background: linear-gradient(135deg, #4CAF50 0%, #45a049 100%) !important;
+  margin: 0 !important;
+  padding: 16px !important;
+  border-radius: 10px 10px 0 0 !important;
+  font-size: 18px !important;
+  font-weight: 600 !important;
+  text-align: center !important;
+  box-shadow: 0 2px 8px rgba(76, 175, 80, 0.2) !important;
+}
+
+.leaflet-routing-container h3 {
+  color: #2E7D32 !important;
+  background: rgba(76, 175, 80, 0.1) !important;
+  margin: 0 !important;
+  padding: 12px 16px !important;
+  font-size: 16px !important;
+  font-weight: 500 !important;
+  border-bottom: 1px solid rgba(76, 175, 80, 0.2) !important;
+}
+
+.leaflet-routing-alternatives-container {
+  background: rgba(255, 255, 255, 0.9) !important;
+  padding: 8px !important;
+}
+
+.leaflet-routing-alt {
+  background: rgba(255, 255, 255, 0.9) !important;
+  border: 2px solid #E8F5E8 !important;
+  margin: 6px !important;
+  border-radius: 8px !important;
+  color: #333 !important;
+  padding: 12px !important;
+  position: relative !important;
+  transition: all 0.3s ease !important;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1) !important;
+}
+
+.leaflet-routing-alt:hover {
+  background: rgba(76, 175, 80, 0.1) !important;
+  border-color: #4CAF50 !important;
+  transform: translateY(-2px) !important;
+  box-shadow: 0 4px 12px rgba(76, 175, 80, 0.2) !important;
+}
+
+.leaflet-routing-alt.leaflet-routing-alt-active {
+  background: rgba(76, 175, 80, 0.15) !important;
+  border-color: #4CAF50 !important;
+  box-shadow: 0 4px 16px rgba(76, 175, 80, 0.3) !important;
+}
+
+/* Enhanced color indicators for different routes */
+.leaflet-routing-alt:nth-child(1)::before {
+  content: '';
+  position: absolute;
+  left: 8px;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 6px;
+  height: 30px;
+  background: linear-gradient(135deg, #4CAF50, #45a049);
+  border-radius: 3px;
+  box-shadow: 0 2px 4px rgba(76, 175, 80, 0.3);
+}
+
+.leaflet-routing-alt:nth-child(2)::before {
+  content: '';
+  position: absolute;
+  left: 8px;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 6px;
+  height: 30px;
+  background: linear-gradient(135deg, #FF6B6B, #E53E3E);
+  border-radius: 3px;
+  box-shadow: 0 2px 4px rgba(255, 107, 107, 0.3);
+}
+
+.leaflet-routing-alt:nth-child(3)::before {
+  content: '';
+  position: absolute;
+  left: 8px;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 6px;
+  height: 30px;
+  background: linear-gradient(135deg, #FF9F43, #FF6B35);
+  border-radius: 3px;
+  box-shadow: 0 2px 4px rgba(255, 159, 67, 0.3);
+}
+
+.leaflet-routing-alt {
+  padding-left: 24px !important; /* Make room for enhanced color indicator */
+}
+
+.leaflet-routing-instruction {
+  color: #333 !important;
+  padding: 10px 16px !important;
+  border-bottom: 1px solid rgba(76, 175, 80, 0.1) !important;
+  background: rgba(255, 255, 255, 0.7) !important;
+  display: flex !important;
+  align-items: center !important;
+  transition: all 0.2s ease !important;
+}
+
+.leaflet-routing-instruction:hover {
+  background: rgba(76, 175, 80, 0.1) !important;
+  color: #2E7D32 !important;
+  transform: translateX(4px) !important;
+}
+
+.leaflet-routing-instruction:hover .leaflet-routing-instruction-distance {
+  color: #4CAF50 !important;
+}
+
+.leaflet-routing-instruction-distance {
+  color: #4CAF50 !important;
+  font-weight: 600 !important;
+  background: rgba(76, 175, 80, 0.1) !important;
+  padding: 2px 8px !important;
+  border-radius: 12px !important;
+  font-size: 12px !important;
+}
+
+.leaflet-routing-instruction-text {
+  color: #333 !important;
+  font-weight: 500 !important;
+}
+
+/* Enhanced direction icons styling */
+.leaflet-routing-instruction-icon {
+  filter: none !important;
+  margin-right: 12px !important;
+  width: 24px !important;
+  height: 24px !important;
+  background: #4CAF50 !important;
+  border-radius: 50% !important;
+  padding: 4px !important;
+}
+
+.leaflet-routing-instruction:hover .leaflet-routing-instruction-icon {
+  background: #45a049 !important;
+  transform: scale(1.1) !important;
+}
+
+.leaflet-routing-geocoders {
+  background: rgba(255, 255, 255, 0.9) !important;
+  padding: 12px !important;
+  border-radius: 0 0 10px 10px !important;
+}
+
+.leaflet-routing-geocoder {
+  background: rgba(255, 255, 255, 0.9) !important;
+  border: 2px solid #E8F5E8 !important;
+  border-radius: 8px !important;
+  margin: 4px 0 !important;
+  transition: all 0.3s ease !important;
+}
+
+.leaflet-routing-geocoder:focus-within {
+  border-color: #4CAF50 !important;
+  box-shadow: 0 0 0 3px rgba(76, 175, 80, 0.1) !important;
+}
+
+.leaflet-routing-geocoder input {
+  background: transparent !important;
+  color: #333 !important;
+  border: none !important;
+  padding: 12px !important;
+  font-size: 14px !important;
+  font-weight: 500 !important;
+}
+
+.leaflet-routing-geocoder input::placeholder {
+  color: #999 !important;
+}
+
+/* Enhanced collapse/expand button */
+.leaflet-routing-collapse-btn {
+  background: linear-gradient(135deg, #4CAF50, #45a049) !important;
+  color: #fff !important;
+  border: none !important;
+  padding: 8px 12px !important;
+  border-radius: 6px !important;
+  cursor: pointer !important;
+  float: right !important;
+  margin: 8px !important;
+  font-weight: 600 !important;
+  transition: all 0.3s ease !important;
+  box-shadow: 0 2px 8px rgba(76, 175, 80, 0.2) !important;
+}
+
+.leaflet-routing-collapse-btn:hover {
+  background: linear-gradient(135deg, #45a049, #388E3C) !important;
+  transform: translateY(-2px) !important;
+  box-shadow: 0 4px 12px rgba(76, 175, 80, 0.3) !important;
+}
+
+/* Enhanced custom scrollbar for directions */
+.leaflet-routing-container::-webkit-scrollbar {
+  width: 10px;
+}
+
+.leaflet-routing-container::-webkit-scrollbar-track {
+  background: rgba(76, 175, 80, 0.1);
+  border-radius: 5px;
+}
+
+.leaflet-routing-container::-webkit-scrollbar-thumb {
+  background: linear-gradient(135deg, #4CAF50, #45a049);
+  border-radius: 5px;
+  box-shadow: 0 2px 4px rgba(76, 175, 80, 0.2);
+}
+
+.leaflet-routing-container::-webkit-scrollbar-thumb:hover {
+  background: linear-gradient(135deg, #45a049, #388E3C);
+}
+/* Modern Card-Style Jeepney Fare Calculator */
+.fare-calculator {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  overflow-y: auto;
+}
+
+.header-card {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  border-radius: 16px;
+  padding: 24px;
+  text-align: center;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+}
+
+.header-card h1 {
+  color: #fff;
+  margin: 0 0 8px 0;
+  font-size: 28px;
+  font-weight: bold;
+}
+
+.header-card p {
+  color: rgba(255, 255, 255, 0.9);
+  margin: 0;
+  font-size: 16px;
+}
+
+.info-card {
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 16px;
+  overflow: hidden;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.2);
+}
+
+.card-header {
+  background: rgba(255, 255, 255, 0.1);
+  padding: 16px 20px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.card-header.primary {
+  background: linear-gradient(135deg, #6FA1EC 0%, #2c5aa0 100%);
+}
+
+.card-header h3, .card-header h2 {
+  color: #fff;
+  margin: 0;
+  font-size: 18px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.route-badge {
+  background: rgba(255, 255, 255, 0.2);
+  padding: 4px 12px;
+  border-radius: 20px;
+  font-size: 12px;
+  font-weight: bold;
+  color: #fff;
+}
+
+.route-badge.alt {
+  background: rgba(255, 255, 255, 0.15);
+}
+
+.card-content {
+  padding: 16px;
+}
+
+.card-content.compact {
+  padding: 12px;
+}
+
+.fare-structure {
+  margin-top: 16px;
+}
+
+.fare-structure h4 {
+  color: #4CAF50;
+  margin: 0 0 12px 0;
+  font-size: 16px;
+}
+
+.rate-item {
+  display: flex;
+  justify-content: space-between;
+  padding: 8px 0;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.rate-label {
+  color: #ccc;
+  font-weight: 500;
+}
+
+.rate-value {
+  color: #fff;
+  font-weight: bold;
+}
+
+.results-container {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.main-route-card {
+  background: rgba(255, 255, 255, 0.05);
+  border: 2px solid #6FA1EC;
+  border-radius: 16px;
+  overflow: hidden;
+  box-shadow: 0 8px 24px rgba(111, 161, 236, 0.2);
+}
+
+.stats-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 16px;
+  margin-bottom: 20px;
+}
+
+.stat-item {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  background: rgba(255, 255, 255, 0.05);
+  padding: 16px;
+  border-radius: 12px;
+}
+
+.stat-icon {
+  font-size: 24px;
+}
+
+.stat-info {
+  display: flex;
+  flex-direction: column;
+}
+
+.stat-label {
+  color: #ccc;
+  font-size: 12px;
+  font-weight: 500;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.stat-value {
+  color: #fff;
+  font-size: 18px;
+  font-weight: bold;
+}
+
+.fare-display {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  background: linear-gradient(135deg, #4CAF50 0%, #45a049 100%);
+  padding: 20px;
+  border-radius: 12px;
+  box-shadow: 0 4px 16px rgba(76, 175, 80, 0.3);
+}
+
+.fare-icon {
+  font-size: 32px;
+}
+
+.fare-info {
+  display: flex;
+  flex-direction: column;
+}
+
+.fare-label {
+  color: rgba(255, 255, 255, 0.9);
+  font-size: 14px;
+  font-weight: 500;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.fare-amount {
+  color: #fff;
+  font-size: 28px;
+  font-weight: bold;
+}
+
+.alternatives-section {
+  margin-top: 8px;
+}
+
+.alternatives-section h3 {
+  color: #fff;
+  margin: 0 0 12px 0;
+  font-size: 16px;
+}
+
+.alt-route-card {
+  background: rgba(255, 255, 255, 0.03);
+  border-radius: 12px;
+  overflow: hidden;
+  margin-bottom: 12px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.alt-route-card.alt-1 {
+  border-left: 4px solid #FF6B6B;
+}
+
+.alt-route-card.alt-2 {
+  border-left: 4px solid #FF9F43;
+}
+
+.alt-route-card .card-header {
+  background: rgba(255, 255, 255, 0.05);
+  padding: 12px 16px;
+}
+
+.alt-route-card h4 {
+  color: #fff;
+  margin: 0;
+  font-size: 14px;
+}
+
+.alt-stats {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.alt-stat {
+  color: #ccc;
+  font-size: 12px;
+}
+
+.alt-fare {
+  color: #4CAF50;
+  font-weight: bold;
+  font-size: 14px;
+}
+/* Multi-Modal Transport Styles */
+.vehicle-rates {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  margin-top: 12px;
+}
+
+.vehicle-rate {
+  background: rgba(255, 255, 255, 0.05);
+  border-radius: 8px;
+  padding: 12px;
+}
+
+.vehicle-name {
+  color: #4CAF50;
+  font-weight: bold;
+  font-size: 14px;
+  display: block;
+  margin-bottom: 8px;
+}
+
+.rate-details {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.multi-modal-header {
+  background: linear-gradient(135deg, #FF6B6B 0%, #4ECDC4 100%);
+  border-radius: 16px;
+  padding: 20px;
+  text-align: center;
+  margin-bottom: 20px;
+}
+
+.multi-modal-header h2 {
+  color: #fff;
+  margin: 0 0 8px 0;
+  font-size: 24px;
+}
+
+.multi-modal-header p {
+  color: rgba(255, 255, 255, 0.9);
+  margin: 0;
+  font-size: 14px;
+}
+
+.route-legs {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  margin-bottom: 20px;
+}
+
+.route-leg {
+  border-radius: 12px;
+  overflow: hidden;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+}
+
+.jeepney-leg {
+  border: 2px solid #6FA1EC;
+}
+
+.tricycle-leg {
+  border: 2px solid #FF9F43;
+}
+
+.leg-header {
+  padding: 12px 16px;
+  color: #fff;
+}
+
+.jeepney-leg .leg-header {
+  background: linear-gradient(135deg, #6FA1EC 0%, #2c5aa0 100%);
+}
+
+.tricycle-leg .leg-header {
+  background: linear-gradient(135deg, #FF9F43 0%, #FF6B35 100%);
+}
+
+.leg-header h3 {
+  margin: 0;
+  font-size: 16px;
+}
+
+.leg-stats {
+  padding: 16px;
+  background: rgba(255, 255, 255, 0.02);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.leg-stat {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.leg-stat .stat-icon {
+  font-size: 16px;
+}
+
+.leg-stat .stat-value {
+  color: #fff;
+  font-weight: bold;
+  font-size: 14px;
+}
+
+.leg-fare {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  background: rgba(76, 175, 80, 0.2);
+  padding: 8px 12px;
+  border-radius: 6px;
+}
+
+.leg-fare .fare-label {
+  color: #ccc;
+  font-size: 12px;
+}
+
+.leg-fare .fare-value {
+  color: #4CAF50;
+  font-weight: bold;
+  font-size: 16px;
+}
+
+.total-summary {
+  background: linear-gradient(135deg, #4CAF50 0%, #45a049 100%);
+  border-radius: 12px;
+  overflow: hidden;
+  box-shadow: 0 6px 20px rgba(76, 175, 80, 0.3);
+}
+
+.summary-header {
+  padding: 16px;
+  text-align: center;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+.summary-header h3 {
+  color: #fff;
+  margin: 0;
+  font-size: 18px;
+}
+
+.summary-stats {
+  padding: 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.summary-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 8px 0;
+}
+
+.summary-item.total-fare {
+  border-top: 1px solid rgba(255, 255, 255, 0.2);
+  padding-top: 12px;
+  margin-top: 8px;
+}
+
+.summary-label {
+  color: rgba(255, 255, 255, 0.9);
+  font-weight: 500;
+}
+
+.summary-value {
+  color: #fff;
+  font-weight: bold;
+}
+
+.total-fare .summary-value {
+  font-size: 20px;
+}
+
+/* Waypoint button styling */
+.waypoint-btn {
+  background: #4ECDC4;
+  color: white;
+  border: none;
+  padding: 10px 15px;
+  border-radius: 5px;
+  cursor: pointer;
+  font-weight: bold;
+  transition: all 0.3s ease;
+}
+
+.waypoint-btn.active {
+  background: #FF9800;
+  animation: pulse 1.5s infinite;
+}
+
+.waypoint-btn:disabled {
+  cursor: not-allowed;
+}
+
+.waypoint-btn:hover:not(:disabled) {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+  background: #45B7B8;
+}
+/* Vehicle Selection Styles */
+.vehicle-selection-card {
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 16px;
+  overflow: hidden;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.2);
+  padding: 20px;
+}
+
+.vehicle-grid {
+  display: flex;
+  justify-content: center;
+  align-items: flex-start;
+  gap: 15px;
+  flex-wrap: nowrap; /* Force horizontal line only */
+  margin: 0 auto;
+  max-width: 600px;
+  overflow-x: auto; /* Allow horizontal scroll if needed */
+}
+
+.vehicle-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 10px; /* Add margin to prevent overlap with buttons */
+}
+
+.vehicle-option {
+  background: rgba(255, 255, 255, 0.05);
+  border: 2px solid rgba(255, 255, 255, 0.1);
+  border-radius: 50%;
+  padding: 0;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 60px;
+  height: 60px;
+  flex-shrink: 0;
+}
+
+.vehicle-option:hover {
+  background: rgba(255, 255, 255, 0.1);
+  transform: translateY(-2px) scale(1.05);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+}
+
+.vehicle-option.active {
+  border-color: #4CAF50;
+  background: rgba(76, 175, 80, 0.2);
+  box-shadow: 0 0 20px rgba(76, 175, 80, 0.4);
+  transform: scale(1.1);
+}
+
+.vehicle-icon {
+  font-size: 24px;
+  transition: all 0.3s ease;
+}
+
+.vehicle-option:hover .vehicle-icon {
+  transform: scale(1.1);
+}
+
+.vehicle-name {
+  color: #fff;
+  font-weight: bold;
+  font-size: 12px;
+  text-align: center;
+  line-height: 1.2;
+}
+
+/* Route Cards Styles */
+.route-cards-container {
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 16px;
+  overflow: hidden;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.2);
+}
+
+.route-cards-list {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  padding: 16px;
+}
+
+.route-card {
+  background: rgba(255, 255, 255, 0.08);
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  border-radius: 12px;
+  overflow: hidden;
+  transition: all 0.3s ease;
+  position: relative;
+}
+
+.route-card:hover {
+  background: rgba(255, 255, 255, 0.12);
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+}
+
+.route-card.removing {
+  opacity: 0.5;
+  transform: scale(0.95);
+  pointer-events: none;
+}
+
+.route-card.route-hidden {
+  opacity: 0.6;
+  border-color: rgba(255, 255, 255, 0.08);
+}
+
+.route-card.route-hidden .route-card-header {
+  background: rgba(255, 255, 255, 0.02);
+}
+
+.route-card-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 12px 16px;
+  background: rgba(255, 255, 255, 0.05);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.route-card-title {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.route-card-title .vehicle-icon {
+  font-size: 18px;
+}
+
+.route-card-title .vehicle-name {
+  color: #fff;
+  font-weight: bold;
+  font-size: 14px;
+}
+
+.route-card-actions {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+}
+
+.toggle-route-btn {
+  background: rgba(76, 175, 80, 0.8);
+  color: white;
+  border: none;
+  border-radius: 50%;
+  width: 24px;
+  height: 24px;
+  cursor: pointer;
+  font-size: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.3s ease;
+}
+
+.toggle-route-btn:hover {
+  background: rgba(76, 175, 80, 1);
+  transform: scale(1.1);
+}
+
+.close-route-btn {
+  background: rgba(244, 67, 54, 0.8);
+  color: white;
+  border: none;
+  border-radius: 50%;
+  width: 24px;
+  height: 24px;
+  cursor: pointer;
+  font-size: 12px;
+  font-weight: bold;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.3s ease;
+}
+
+.close-route-btn:hover {
+  background: rgba(244, 67, 54, 1);
+  transform: scale(1.1);
+}
+
+.route-card-content {
+  padding: 12px 16px;
+}
+
+.route-card-stats {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.route-stat {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.route-stat .stat-icon {
+  font-size: 14px;
+}
+
+.route-stat .stat-value {
+  color: #fff;
+  font-weight: bold;
+  font-size: 13px;
+}
+
+.route-cards-actions {
+  padding: 16px;
+  border-top: 1px solid rgba(255, 255, 255, 0.1);
+  text-align: center;
+}
+
+.clear-all-routes-btn {
+  background: #9C27B0;
+  color: white;
+  border: none;
+  padding: 10px 20px;
+  border-radius: 8px;
+  cursor: pointer;
+  font-weight: bold;
+  font-size: 14px;
+  transition: all 0.3s ease;
+}
+
+.clear-all-routes-btn:hover {
+  background: #7B1FA2;
+  transform: translateY(-1px);
+}
+
+/* Route Connection Options */
+.route-connection-options {
+  margin-top: 16px;
+  padding-top: 16px;
+  border-top: 1px solid rgba(255, 255, 255, 0.1);
+  text-align: center;
+}
+
+.connection-text {
+  color: #ccc;
+  font-size: 13px;
+  margin: 0;
+  font-style: italic;
+}
+
+/* Multi-Modal Vehicle Selection */
+.multi-modal-selection {
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 16px;
+  overflow: hidden;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.2);
+}
+
+.leg-selectors {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.leg-selector {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding: 12px;
+  background: rgba(255, 255, 255, 0.02);
+  border-radius: 8px;
+}
+
+.leg-selector label {
+  color: #fff;
+  font-weight: 500;
+  font-size: 14px;
+  margin-bottom: 4px;
+}
+
+.mini-vehicle-options {
+  display: flex;
+  gap: 6px;
+  flex-wrap: wrap;
+  justify-content: flex-start;
+}
+
+.mini-vehicle {
+  background: rgba(255, 255, 255, 0.1);
+  border: 2px solid rgba(255, 255, 255, 0.2);
+  border-radius: 6px;
+  padding: 6px 8px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  font-size: 16px;
+  min-width: 36px;
+  text-align: center;
+}
+
+.mini-vehicle:hover {
+  background: rgba(255, 255, 255, 0.2);
+}
+
+.mini-vehicle.active {
+  border-color: #4CAF50;
+  background: rgba(76, 175, 80, 0.3);
+}
+
+/* Dynamic leg styling based on vehicle type */
+.jeepney-leg {
+  border: 2px solid #6FA1EC;
+}
+
+.tricycle-leg {
+  border: 2px solid #FF9F43;
+}
+
+.taxi-leg {
+  border: 2px solid #FFD93D;
+}
+
+.bus-leg {
+  border: 2px solid #28A745;
+}
+
+.motorcycle-leg {
+  border: 2px solid #FF6B6B;
+}
+
+.boat-leg {
+  border: 2px solid #4ECDC4;
+}
+
+.plane-leg {
+  border: 2px solid #A8E6CF;
+}
+
+.jeepney-leg .leg-header {
+  background: linear-gradient(135deg, #6FA1EC 0%, #2c5aa0 100%);
+}
+
+.tricycle-leg .leg-header {
+  background: linear-gradient(135deg, #FF9F43 0%, #FF6B35 100%);
+}
+
+.taxi-leg .leg-header {
+  background: linear-gradient(135deg, #FFD93D 0%, #FF9800 100%);
+}
+
+.bus-leg .leg-header {
+  background: linear-gradient(135deg, #28A745 0%, #1E7E34 100%);
+}
+
+.motorcycle-leg .leg-header {
+  background: linear-gradient(135deg, #FF6B6B 0%, #E53E3E 100%);
+}
+
+.boat-leg .leg-header {
+  background: linear-gradient(135deg, #4ECDC4 0%, #26D0CE 100%);
+}
+
+.plane-leg .leg-header {
+  background: linear-gradient(135deg, #A8E6CF 0%, #81C784 100%);
+}
+
+/* Fare breakdown styling */
+.fare-breakdown {
+  margin-top: 8px;
+  padding-top: 8px;
+  border-top: 1px solid rgba(255, 255, 255, 0.2);
+  text-align: center;
+}
+
+.fare-breakdown small {
+  color: rgba(255, 255, 255, 0.7);
+  font-size: 12px;
+}
+
+/* Enhanced route badge for direct routes */
+.route-badge {
+  background: rgba(255, 255, 255, 0.2);
+  padding: 4px 12px;
+  border-radius: 20px;
+  font-size: 12px;
+  font-weight: bold;
+  color: #fff;
+}
+
+.route-badge.alt {
+  background: rgba(255, 255, 255, 0.15);
+}
+/* Instruction Steps Styling */
+.instruction-steps {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  margin-bottom: 20px;
+}
+
+.step {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px;
+  background: rgba(255, 255, 255, 0.05);
+  border-radius: 8px;
+  border-left: 4px solid #4CAF50;
+}
+
+.step-number {
+  background: #4CAF50;
+  color: #fff;
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 12px;
+  font-weight: bold;
+  flex-shrink: 0;
+}
+
+.step-text {
+  color: #fff;
+  font-size: 14px;
+}
+
+.transport-note {
+  background: rgba(255, 193, 7, 0.1);
+  border: 1px solid rgba(255, 193, 7, 0.3);
+  border-radius: 8px;
+  padding: 12px;
+}
+
+.transport-note p {
+  color: #FFC107;
+  margin: 0;
+  font-size: 13px;
+}
+
+/* Error Card Styling */
+.error-card {
+  background: rgba(244, 67, 54, 0.1);
+  border: 2px solid #f44336;
+  border-radius: 16px;
+  overflow: hidden;
+  box-shadow: 0 8px 24px rgba(244, 67, 54, 0.2);
+}
+
+.card-header.error {
+  background: linear-gradient(135deg, #f44336 0%, #d32f2f 100%);
+}
+
+.error-message {
+  color: #ffcdd2;
+  font-size: 16px;
+  margin-bottom: 16px;
+  text-align: center;
+}
+
+.error-stats {
+  display: flex;
+  justify-content: space-around;
+  margin-bottom: 16px;
+  padding: 12px;
+  background: rgba(255, 255, 255, 0.05);
+  border-radius: 8px;
+}
+
+.error-stats span {
+  color: #fff;
+  font-size: 14px;
+}
+
+.error-suggestion {
+  color: #ffab91;
+  font-size: 14px;
+  text-align: center;
+  margin: 0;
+  font-style: italic;
+}
+/* Airport and pier markers are clickable when respective vehicles are selected */
+/* Route Action Button */
+.route-action-btn {
+  background: #4CAF50;
+  color: white;
+  border: none;
+  padding: 8px 16px;
+  border-radius: 20px;
+  cursor: pointer;
+  font-weight: bold;
+  font-size: 12px;
+  transition: all 0.3s ease;
+  white-space: nowrap;
+  min-width: 80px;
+}
+
+.route-status {
+  background: #FF9800;
+  color: white;
+  padding: 6px 12px;
+  border-radius: 15px;
+  font-size: 10px;
+  font-weight: bold;
+  text-align: center;
+  animation: pulse 1.5s infinite;
+  white-space: nowrap;
+  max-width: 120px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.route-action-btn:hover:not(:disabled) {
+  background: #45a049;
+  transform: translateY(-1px);
+}
+
+.route-action-btn.active {
+  background: #FF9800;
+  animation: pulse 1.5s infinite;
+}
+
+.route-action-btn:disabled {
+  cursor: not-allowed;
+}
+
+/* Waypoint Control */
+.waypoint-control {
+  position: absolute;
+  top: 20px;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 1000;
+}
+
+.waypoint-control .waypoint-btn {
+  background: #FF9800;
+  color: white;
+  border: none;
+  padding: 12px 20px;
+  border-radius: 25px;
+  font-weight: bold;
+  animation: pulse 1.5s infinite;
+  box-shadow: 0 4px 12px rgba(255, 152, 0, 0.4);
+}
+/* Airport and Pier Marker Containers - Enhanced for better visibility */
+.airport-marker-container {
+  background: transparent !important;
+  border: none !important;
+  cursor: pointer !important;
+}
+
+.pier-marker-container {
+  background: transparent !important;
+  border: none !important;
+  cursor: pointer !important;
+}
+
+/* Enhanced marker popup styling */
+.leaflet-popup-content {
+  color: #333 !important;
+  font-weight: bold !important;
+  text-align: center !important;
+}
+
+.leaflet-popup-content small {
+  color: #666 !important;
+  font-style: italic !important;
+  display: block !important;
+  margin-top: 4px !important;
+}
