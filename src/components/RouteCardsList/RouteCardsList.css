@@ -1,0 +1,230 @@
+/* Route Cards Styles */
+.route-cards-container {
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 16px;
+  overflow: hidden;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.2);
+  display: flex;
+  flex-direction: column;
+  max-height: 500px;
+}
+
+.card-header {
+  background: rgba(255, 255, 255, 0.1);
+  padding: 16px 20px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.card-header h3 {
+  color: #fff;
+  margin: 0;
+  font-size: 18px;
+}
+
+.route-cards-list {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  padding: 16px;
+  max-height: 400px;
+  overflow-y: auto;
+  overflow-x: hidden;
+  scroll-behavior: smooth;
+  flex: 1;
+  min-height: 0;
+}
+
+/* Enhanced custom scrollbar */
+.route-cards-list::-webkit-scrollbar {
+  width: 10px;
+}
+
+.route-cards-list::-webkit-scrollbar-track {
+  background: rgba(255, 255, 255, 0.05);
+  border-radius: 5px;
+  margin: 4px;
+}
+
+.route-cards-list::-webkit-scrollbar-thumb {
+  background: linear-gradient(135deg, rgba(76, 175, 80, 0.6), rgba(76, 175, 80, 0.8));
+  border-radius: 5px;
+  border: 2px solid rgba(255, 255, 255, 0.05);
+}
+
+.route-cards-list::-webkit-scrollbar-thumb:hover {
+  background: linear-gradient(135deg, rgba(76, 175, 80, 0.8), rgba(76, 175, 80, 1));
+}
+
+.route-cards-list {
+  scrollbar-width: thin;
+  scrollbar-color: rgba(76, 175, 80, 0.6) rgba(255, 255, 255, 0.05);
+}
+
+.route-card {
+  background: rgba(255, 255, 255, 0.08);
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  border-radius: 12px;
+  overflow: hidden;
+  transition: all 0.3s ease;
+  position: relative;
+  cursor: pointer;
+  user-select: none;
+}
+
+.route-card:hover {
+  background: rgba(255, 255, 255, 0.12);
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+}
+
+.route-card.route-hovered {
+  background: rgba(76, 175, 80, 0.2);
+  border-color: #4CAF50;
+  box-shadow: 0 6px 20px rgba(76, 175, 80, 0.4);
+  transform: translateY(-3px) scale(1.02);
+}
+
+.route-card.route-selected {
+  background: rgba(76, 175, 80, 0.3);
+  border-color: #4CAF50;
+  border-width: 2px;
+  box-shadow: 0 8px 24px rgba(76, 175, 80, 0.6);
+  transform: translateY(-4px) scale(1.03);
+  animation: pulse-border 1.5s ease-in-out;
+}
+
+@keyframes pulse-border {
+  0%, 100% {
+    box-shadow: 0 8px 24px rgba(76, 175, 80, 0.6);
+  }
+  50% {
+    box-shadow: 0 8px 32px rgba(76, 175, 80, 0.8);
+  }
+}
+
+.route-card.route-hidden {
+  opacity: 0.6;
+  border-color: rgba(255, 255, 255, 0.08);
+}
+
+.route-card-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 12px 16px;
+  background: rgba(255, 255, 255, 0.05);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.route-card-title {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.vehicle-icon {
+  font-size: 18px;
+}
+
+.vehicle-name {
+  color: #fff;
+  font-weight: bold;
+  font-size: 14px;
+}
+
+.route-card-actions {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+}
+
+.toggle-route-btn {
+  background: rgba(76, 175, 80, 0.8);
+  color: white;
+  border: none;
+  border-radius: 50%;
+  width: 24px;
+  height: 24px;
+  cursor: pointer;
+  font-size: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.3s ease;
+}
+
+.toggle-route-btn:hover {
+  background: rgba(76, 175, 80, 1);
+  transform: scale(1.1);
+}
+
+.close-route-btn {
+  background: rgba(244, 67, 54, 0.8);
+  color: white;
+  border: none;
+  border-radius: 50%;
+  width: 24px;
+  height: 24px;
+  cursor: pointer;
+  font-size: 12px;
+  font-weight: bold;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.3s ease;
+}
+
+.close-route-btn:hover {
+  background: rgba(244, 67, 54, 1);
+  transform: scale(1.1);
+}
+
+.route-card-content {
+  padding: 12px 16px;
+}
+
+.route-card-stats {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.route-stat {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.stat-icon {
+  font-size: 14px;
+}
+
+.stat-value {
+  color: #fff;
+  font-weight: bold;
+  font-size: 13px;
+}
+
+.route-cards-actions {
+  padding: 16px;
+  border-top: 1px solid rgba(255, 255, 255, 0.1);
+  text-align: center;
+}
+
+.clear-all-routes-btn {
+  background: #9C27B0;
+  color: white;
+  border: none;
+  padding: 10px 20px;
+  border-radius: 8px;
+  cursor: pointer;
+  font-weight: bold;
+  font-size: 14px;
+  transition: all 0.3s ease;
+}
+
+.clear-all-routes-btn:hover {
+  background: #7B1FA2;
+  transform: translateY(-1px);
+}
