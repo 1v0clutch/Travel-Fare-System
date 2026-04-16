@@ -6,7 +6,7 @@
   padding: 0;
 }
 
-/* ─── Layout ────────────────────────────────────────────────── */
+/* ─── Layout ──────────────────────────────────────────────────*/
 .app-container {
   display: flex;
   width: 100vw;
@@ -14,19 +14,21 @@
 }
 
 .section {
-  flex: 1;
-  width: 50%;
   height: 100%;
   display: flex;
   flex-direction: column;
 }
 
 .left-section {
+  flex: 0 0 33.333%;
+  width: 33.333%;
   padding: 0;
   overflow: hidden;
 }
 
 .right-section {
+  flex: 0 0 66.667%;
+  width: 66.667%;
   padding: 0;
   position: relative;
 }
@@ -712,6 +714,167 @@
   background: rgba(156,39,176,0.28);
   border-color: #9C27B0;
   color: #fff;
+}
+
+/* ─── Error Card ────────────────────────────────────────────── */
+.error-card {
+  background: rgba(244,67,54,0.08);
+  border: 1px solid rgba(244,67,54,0.4);
+  border-radius: 12px;
+  padding: 14px 16px;
+  margin-bottom: 12px;
+  animation: slideInError 0.3s ease;
+}
+
+@keyframes slideInError {
+  from {
+    opacity: 0;
+    transform: translateY(-8px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.error-card-content {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.error-message {
+  color: #ff8a80;
+  font-size: 13px;
+  line-height: 1.5;
+  font-weight: 500;
+  white-space: pre-line;
+}
+
+.error-actions {
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.error-btn {
+  flex: 1;
+  min-width: 120px;
+  padding: 8px 12px;
+  border: none;
+  border-radius: 8px;
+  font-size: 12px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  text-align: center;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+}
+
+.error-btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.error-btn-reroute {
+  background: rgba(76,175,80,0.2);
+  border: 1px solid rgba(76,175,80,0.5);
+  color: #81c784;
+}
+
+.error-btn-reroute:hover:not(:disabled) {
+  background: rgba(76,175,80,0.35);
+  border-color: #4CAF50;
+  color: #fff;
+}
+
+.error-btn-reset {
+  background: rgba(255,152,0,0.2);
+  border: 1px solid rgba(255,152,0,0.5);
+  color: #ffb74d;
+}
+
+.error-btn-reset:hover:not(:disabled) {
+  background: rgba(255,152,0,0.35);
+  border-color: #FF9800;
+  color: #fff;
+}
+
+/* ─── Calculating Card ──────────────────────────────────────── */
+.calculating-card {
+  background: rgba(33,150,243,0.08);
+  border: 1px solid rgba(33,150,243,0.4);
+  border-radius: 12px;
+  padding: 16px;
+  margin-bottom: 12px;
+  animation: slideInCalculating 0.3s ease;
+}
+
+@keyframes slideInCalculating {
+  from {
+    opacity: 0;
+    transform: translateY(-8px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.calculating-content {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 12px;
+  text-align: center;
+}
+
+.calculating-spinner {
+  font-size: 32px;
+  animation: spin 2s linear infinite;
+}
+
+@keyframes spin {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.calculating-text {
+  color: #64B5F6;
+  font-size: 14px;
+  font-weight: 600;
+}
+
+.calculating-cancel-btn {
+  padding: 8px 16px;
+  background: rgba(244,67,54,0.2);
+  border: 1px solid rgba(244,67,54,0.5);
+  border-radius: 8px;
+  color: #ff8a80;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.calculating-cancel-btn:hover {
+  background: rgba(244,67,54,0.35);
+  border-color: #F44236;
+  color: #fff;
+}
+
+.calculating-cancel-btn:active {
+  transform: scale(0.98);
 }
 
 /* ─── Leaflet overrides ─────────────────────────────────────── */
