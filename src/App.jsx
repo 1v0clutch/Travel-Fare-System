@@ -139,6 +139,44 @@ function validateCoordinates(coords) {
   return true
 }
 
+// ─── Check if a coordinate is on water via Nominatim ─────────────────────────
+async function isWaterBody(latlng) {
+  try {
+    const url = `https://nominatim.openstreetmap.org/reverse?lat=${latlng.lat}&lon=${latlng.lng}&format=json&zoom=10`
+    const res = await fetch(url, {
+      headers: { 'Accept-Language': 'en' },
+      signal: AbortSignal.timeout(5000),
+    })
+    if (!res.ok) return false
+    const data = await res.json()
+
+    // If Nominatim returns no address or only a sea/ocean/water type, it's water
+    const waterTypes = new Set([
+      'sea', 'ocean', 'bay', 'strait', 'lake', 'river', 'water', 'waterway',
+      'reservoir', 'lagoon', 'gulf', 'fjord', 'estuary',
+    ])
+    const type = data?.type?.toLowerCase() || ''
+    const cls  = data?.class?.toLowerCase() || ''
+    const name = (data?.name || data?.display_name || '').toLowerCase()
+
+    if (waterTypes.has(type) || waterTypes.has(cls)) return true
+
+    // No address at all usually means open sea
+    if (!data.address || Object.keys(data.address).length === 0) return true
+
+    // Address has only sea/ocean keys
+    const addr = data.address
+    const landKeys = ['road','suburb','city','town','village','county','state','country','postcode','neighbourhood','hamlet','municipality']
+    const hasLand = landKeys.some(k => addr[k])
+    if (!hasLand && (addr.sea || addr.ocean || addr.bay || addr.water || addr.lake)) return true
+
+    return false
+  } catch {
+    // On timeout or error, allow the point (fail open)
+    return false
+  }
+}
+
 function isMapReady(map) {
   if (!map) return false
   // Check if map has valid container and is initialized
@@ -278,6 +316,7 @@ function App() {
   const [isVehicleActive, setIsVehicleActive] = useState(false)
   const [currentSegment, setCurrentSegment] = useState(null)
   const [isCalculatingRoute, setIsCalculatingRoute] = useState(false)
+  const [routeStatusMsg, setRouteStatusMsg] = useState('Calculating route...')
   const [routeError, setRouteError] = useState(null)
 
   const [routeCards, setRouteCards] = useState([])
@@ -567,6 +606,19 @@ function App() {
 
         // ── Point A ────────────────────────────────────────────────────────────
         if (waypointIndex === 0) {
+          // Check for water body before placing marker
+          isCalculatingRouteRef.current = true
+          setIsCalculatingRoute(true)
+          setRouteStatusMsg('Checking location…')
+          const onWater = await isWaterBody(e.latlng)
+          isCalculatingRouteRef.current = false
+          setIsCalculatingRoute(false)
+
+          if (onWater) {
+            setRouteError('🌊 Point A is on a water body. Please select a point on land.')
+            return
+          }
+
           const marker = window.L.marker(e.latlng)
             .addTo(map.current)
             .bindPopup(`Point A (${getVehicleInfo(segment.vehicle).name})`)
@@ -579,6 +631,19 @@ function App() {
 
         // ── Point B ────────────────────────────────────────────────────────────
         if (waypointIndex === 1) {
+          // Check for water body before placing marker
+          isCalculatingRouteRef.current = true
+          setIsCalculatingRoute(true)
+          setRouteStatusMsg('Checking location…')
+          const onWater = await isWaterBody(e.latlng)
+          if (onWater) {
+            isCalculatingRouteRef.current = false
+            setIsCalculatingRoute(false)
+            setRouteError('🌊 Point B is on a water body. Please select a point on land.')
+            return
+          }
+          setRouteStatusMsg('Calculating route…')
+
           const markerB = window.L.marker(e.latlng)
             .addTo(map.current)
             .bindPopup(`Point B (${getVehicleInfo(segment.vehicle).name})`)
@@ -586,9 +651,8 @@ function App() {
           const updatedMarkers = [...segment.markers, markerB]
 
           currentSegmentRef.current = null
-          isCalculatingRouteRef.current = true
           setCurrentSegment(null)
-          setIsCalculatingRoute(true)
+          // isCalculatingRoute already true from water check above
 
           const segmentId = segment.id
           const segmentVehicle = segment.vehicle
@@ -878,7 +942,7 @@ function App() {
                 <div className="calculating-card">
                   <div className="calculating-content">
                     <div className="calculating-spinner">⏳</div>
-                    <div className="calculating-text">Calculating route...</div>
+                    <div className="calculating-text">{routeStatusMsg}</div>
                     <button 
                       className="calculating-cancel-btn"
                       onClick={handleCancelRoute}
