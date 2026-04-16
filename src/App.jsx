@@ -978,8 +978,11 @@ function App() {
                       <div className="step"><span className="step-number">1</span><span className="step-text">Select your transport above</span></div>
                       <div className="step"><span className="step-number">2</span><span className="step-text">Tap Point A on the map</span></div>
                       <div className="step"><span className="step-number">3</span><span className="step-text">Tap Point B on the map</span></div>
-                      <div className="step desktop-only"><span className="step-number">💡</span><span className="step-text">Right-click + drag to pan the map</span></div>
-                      <div className="step mobile-only"><span className="step-number">💡</span><span className="step-text">Drag with one finger to pan</span></div>
+                    </div>
+                    <div className="tip-steps">
+                      <div className="tip"><span className="tip-icon">🚫</span><span className="tip-text">Points on water bodies are not allowed</span></div>
+                      <div className="tip desktop-only"><span className="tip-icon">💡</span><span className="tip-text">Right-click + drag to pan the map</span></div>
+                      <div className="tip mobile-only"><span className="tip-icon">💡</span><span className="tip-text">Drag with one finger to pan</span></div>
                     </div>
                   </div>
                 </div>
