@@ -1,1 +1,206 @@
-/* VehicleDropdown styles are defined in App.css */
+/* ─── Vehicle Dropdown Card ─────────────────────────────────── */
+.vd-card {
+  background: rgba(255, 255, 255, 0.06);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 14px;
+  padding: 14px 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.vd-label {
+  color: rgba(255, 255, 255, 0.5);
+  font-size: 11px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.8px;
+}
+
+/* ─── Tile picker (idle state) ──────────────────────────────── */
+.vd-tiles {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+}
+
+.vd-tile {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  padding: 14px 10px;
+  background: rgba(255, 255, 255, 0.07);
+  border: 1.5px solid rgba(255, 255, 255, 0.12);
+  border-radius: 12px;
+  cursor: pointer;
+  transition: all 0.18s ease;
+  color: #fff;
+}
+
+.vd-tile:hover {
+  background: rgba(102, 126, 234, 0.18);
+  border-color: rgba(102, 126, 234, 0.5);
+  transform: translateY(-2px);
+}
+
+.vd-tile-selected {
+  background: rgba(102, 126, 234, 0.25) !important;
+  border-color: #667eea !important;
+  box-shadow: 0 0 0 2px rgba(102, 126, 234, 0.3);
+}
+
+.vd-tile-icon {
+  font-size: 26px;
+  line-height: 1;
+}
+
+.vd-tile-name {
+  font-size: 13px;
+  font-weight: 700;
+  color: #fff;
+}
+
+.vd-tile-desc {
+  font-size: 10px;
+  color: rgba(255, 255, 255, 0.45);
+  font-weight: 500;
+}
+
+/* ─── Active state ──────────────────────────────────────────── */
+.vd-active {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.vd-active-vehicle {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  background: rgba(255, 255, 255, 0.07);
+  border: 1.5px solid rgba(255, 255, 255, 0.15);
+  border-radius: 10px;
+  padding: 10px 12px;
+}
+
+.vd-active-icon {
+  font-size: 24px;
+  flex-shrink: 0;
+}
+
+.vd-active-info {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  min-width: 0;
+}
+
+.vd-active-name {
+  color: #fff;
+  font-size: 14px;
+  font-weight: 700;
+}
+
+.vd-active-desc {
+  color: rgba(255, 255, 255, 0.45);
+  font-size: 11px;
+}
+
+.vd-cancel-btn {
+  flex-shrink: 0;
+  width: 28px;
+  height: 28px;
+  background: rgba(244, 67, 54, 0.75);
+  color: #fff;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  font-size: 12px;
+  font-weight: 700;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.15s ease;
+}
+
+.vd-cancel-btn:hover {
+  background: #f44336;
+  transform: scale(1.08);
+}
+
+/* ─── Status bar ────────────────────────────────────────────── */
+.vd-status {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 9px 12px;
+  border-radius: 9px;
+  font-size: 13px;
+  font-weight: 500;
+  color: #fff;
+}
+
+.vd-status-pick {
+  background: rgba(255, 152, 0, 0.12);
+  border: 1.5px solid rgba(255, 152, 0, 0.45);
+  animation: vd-glow 2s infinite;
+}
+
+.vd-status-calc {
+  background: rgba(102, 126, 234, 0.12);
+  border: 1.5px solid rgba(102, 126, 234, 0.45);
+}
+
+@keyframes vd-glow {
+  0%, 100% { box-shadow: 0 0 6px rgba(255, 152, 0, 0.2); }
+  50%       { box-shadow: 0 0 14px rgba(255, 152, 0, 0.4); }
+}
+
+.vd-status-dot {
+  font-size: 15px;
+  flex-shrink: 0;
+}
+
+.vd-dot-spin {
+  display: inline-block;
+  animation: vd-pulse 1.2s infinite;
+}
+
+@keyframes vd-pulse {
+  0%, 100% { opacity: 1; }
+  50%       { opacity: 0.5; }
+}
+
+/* ─── Done state (route complete) ───────────────────────────── */
+.vd-done {
+  padding: 10px 14px;
+}
+
+.vd-done-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.vd-done-icon {
+  font-size: 20px;
+}
+
+.vd-done-name {
+  color: #fff;
+  font-size: 13px;
+  font-weight: 700;
+  flex: 1;
+}
+
+.vd-done-tag {
+  background: rgba(76, 175, 80, 0.2);
+  color: #4CAF50;
+  font-size: 10px;
+  font-weight: 700;
+  padding: 3px 8px;
+  border-radius: 10px;
+  text-transform: uppercase;
+  letter-spacing: 0.4px;
+}
