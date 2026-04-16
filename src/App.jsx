@@ -3,7 +3,7 @@ import './App.css'
 import VehicleDropdown from './components/VehicleDropdown/VehicleDropdown'
 import { useMapSetup } from './hooks/useMapSetup'
 import { calculateFareByVehicle } from './utils/fareCalculations'
-import { Analytics } from "@vercel/analytics/next"
+import { Analytics } from "@vercel/analytics/react"
 // ─── Route color palette ─────────────────────────────────────────────────────
 const ROUTE_COLORS = [
   '#6FA1EC', '#4CAF50', '#FF9F43', '#FF6B6B',
