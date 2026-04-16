@@ -912,9 +912,10 @@ function App() {
                   <div className="card-content">
                     <div className="instruction-steps">
                       <div className="step"><span className="step-number">1</span><span className="step-text">Select your transport above</span></div>
-                      <div className="step"><span className="step-number">2</span><span className="step-text">Left-click Point A on the map</span></div>
-                      <div className="step"><span className="step-number">3</span><span className="step-text">Left-click Point B on the map</span></div>
-                      <div className="step"><span className="step-number">💡</span><span className="step-text">Right-click + drag to pan the map</span></div>
+                      <div className="step"><span className="step-number">2</span><span className="step-text">Tap Point A on the map</span></div>
+                      <div className="step"><span className="step-number">3</span><span className="step-text">Tap Point B on the map</span></div>
+                      <div className="step desktop-only"><span className="step-number">💡</span><span className="step-text">Right-click + drag to pan the map</span></div>
+                      <div className="step mobile-only"><span className="step-number">💡</span><span className="step-text">Drag with one finger to pan</span></div>
                     </div>
                   </div>
                 </div>

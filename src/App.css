@@ -1,48 +1,60 @@
 /* ─── Reset / Root ─────────────────────────────────────────── */
+* {
+  box-sizing: border-box;
+}
+
 #root {
   width: 100vw;
   height: 100vh;
   margin: 0;
   padding: 0;
+  overflow: hidden;
 }
 
 /* ─── Layout ──────────────────────────────────────────────────*/
 .app-container {
   display: flex;
+  flex-direction: row;
   width: 100vw;
   height: 100vh;
+  overflow: hidden;
 }
 
 .section {
-  height: 100%;
   display: flex;
   flex-direction: column;
+  min-width: 0;
 }
 
 .left-section {
   flex: 0 0 33.333%;
   width: 33.333%;
-  padding: 0;
+  max-width: 33.333%;
+  height: 100%;
   overflow: hidden;
+  display: flex;
+  flex-direction: column;
 }
 
 .right-section {
-  flex: 0 0 66.667%;
-  width: 66.667%;
-  padding: 0;
+  flex: 1 1 0;
+  height: 100%;
   position: relative;
+  min-width: 0;
 }
 
 .map-container {
   width: 100%;
   height: 100%;
+  touch-action: none;  /* prevent page scroll interfering with map touch */
 }
 
 /* ─── Left Panel ────────────────────────────────────────────── */
 .left-panel {
   display: flex;
   flex-direction: column;
-  height: 100%;
+  flex: 1 1 0;
+  min-height: 0;
   background: #1a1a2e;
   overflow: hidden;
 }
@@ -133,7 +145,8 @@
 
 /* ─── Tab Content ───────────────────────────────────────────── */
 .tab-content {
-  flex: 1;
+  flex: 1 1 0;
+  min-height: 0;
   overflow-y: auto;
   padding: 16px;
   display: flex;
@@ -886,4 +899,157 @@
   color: #333 !important;
   font-weight: bold !important;
   text-align: center !important;
+}
+
+/* ─── Responsive ────────────────────────────────────────────── */
+
+/* desktop-only / mobile-only helpers */
+.mobile-only { display: none; }
+.desktop-only { display: flex; }
+
+/* Tablet landscape */
+@media (max-width: 1024px) {
+  .left-section {
+    flex: 0 0 40%;
+    width: 40%;
+    max-width: 40%;
+  }
+  .fare-amount { font-size: 22px; }
+  .result-stat-value { font-size: 14px; }
+  .history-card-stats { gap: 6px; font-size: 11px; }
+}
+
+/* Tablet portrait + mobile: stack vertically */
+@media (max-width: 768px) {
+  .mobile-only { display: flex; }
+  .desktop-only { display: none; }
+
+  .app-container {
+    flex-direction: column;
+  }
+
+  /* Map goes on top */
+  .right-section {
+    order: 1;
+    flex: 0 0 45vh;
+    width: 100%;
+    height: 45vh;
+    min-height: 220px;
+  }
+
+  /* Panel goes below */
+  .left-section {
+    order: 2;
+    flex: 1 1 0;
+    width: 100%;
+    max-width: 100%;
+    height: auto;
+    min-height: 0;
+    overflow: hidden;
+  }
+
+  .left-panel {
+    flex: 1 1 0;
+    min-height: 0;
+  }
+
+  .map-container {
+    width: 100%;
+    height: 100%;
+  }
+
+  .app-navbar {
+    height: 44px;
+    padding: 0 12px;
+  }
+
+  .navbar-logo { font-size: 18px; }
+  .navbar-title { font-size: 13px; }
+  .nav-tab { padding: 5px 10px; }
+  .nav-tab-label { font-size: 11px; }
+
+  .tab-content {
+    padding: 10px 12px;
+    gap: 8px;
+  }
+
+  /* Vehicle tiles: compact on mobile */
+  .vd-tile {
+    padding: 10px 6px;
+    gap: 3px;
+  }
+  .vd-tile-icon { font-size: 22px; }
+  .vd-tile-name { font-size: 12px; }
+  .vd-tile-desc { font-size: 9px; }
+
+  /* Info card: tighter */
+  .card-header { padding: 9px 12px; }
+  .card-header h3 { font-size: 13px; }
+  .card-content { padding: 10px 12px; }
+
+  .instruction-steps { gap: 7px; }
+  .step {
+    padding: 7px 10px;
+    gap: 8px;
+  }
+  .step-number {
+    width: 20px;
+    height: 20px;
+    font-size: 10px;
+  }
+  .step-text { font-size: 12px; }
+
+  /* Results */
+  .result-stats-row {
+    grid-template-columns: 1fr 1fr;
+    gap: 8px;
+  }
+  .result-stat { padding: 9px 10px; gap: 8px; }
+  .result-stat-icon { font-size: 17px; }
+  .result-stat-label { font-size: 10px; }
+  .result-stat-value { font-size: 13px; }
+
+  .fare-display { padding: 11px 12px; gap: 10px; }
+  .fare-icon { font-size: 22px; }
+  .fare-amount { font-size: 20px; }
+  .fare-label { font-size: 11px; }
+
+  .add-new-route-btn { font-size: 13px; padding: 9px; }
+
+  .history-card-stats {
+    flex-wrap: wrap;
+    gap: 4px;
+    font-size: 11px;
+  }
+  .history-card { padding: 8px 10px; }
+}
+
+/* Small mobile */
+@media (max-width: 480px) {
+  .right-section {
+    flex: 0 0 40vh;
+    height: 40vh;
+    min-height: 200px;
+  }
+
+  .navbar-title { font-size: 12px; }
+  .nav-tab-label { display: none; }
+  .nav-tab { padding: 6px 12px; }
+  .nav-tab-icon { font-size: 17px; }
+
+  .tab-content { padding: 8px 10px; gap: 7px; }
+
+  .vd-card { padding: 10px 12px; gap: 8px; }
+  .vd-tiles { gap: 8px; }
+  .vd-tile { padding: 9px 6px; }
+  .vd-tile-icon { font-size: 20px; }
+  .vd-tile-name { font-size: 11px; }
+
+  .card-header h3 { font-size: 12px; }
+  .step-text { font-size: 11px; }
+
+  .result-stats-row { grid-template-columns: 1fr 1fr; }
+  .fare-amount { font-size: 18px; }
+
+  .history-card-stats { font-size: 10px; }
 }
